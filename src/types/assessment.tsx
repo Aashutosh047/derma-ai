@@ -1,4 +1,4 @@
-// src/types/assessment.ts
+// src/types/assessment.tsx
 
 export interface UserDetails {
   name: string;
@@ -37,6 +37,25 @@ export const imageLabels: Record<ImageLabel, string> = {
   sides: "Side View",
 };
 
+export interface FusionPrediction {
+  disease: string;
+  probability: number;
+  confidence?: string;
+  image_contribution?: number;
+  questionnaire_contribution?: number;
+}
+
+export interface FusionResult {
+  primary_diagnosis: FusionPrediction;
+  all_fused_predictions: FusionPrediction[];
+  questionnaire_role: "boost" | "alternative" | "weak_support" | string;
+  clinical_summary: string;
+  model_details: {
+    questionnaire_top_prediction: FusionPrediction;
+    [key: string]: any;
+  };
+}
+
 export interface HairHealthReport {
   generatedAt: Date;
   overallRiskLevel: "low" | "medium" | "high";
@@ -45,8 +64,8 @@ export interface HairHealthReport {
   scalpHealthWarning: boolean;
   possibleCauses: string[];
   recommendations: string[];
-  
-  // ML Prediction fields - ADDED
+
+  // ML Prediction fields
   predictedClass?: string;
   predictedProbability?: number;
   allClassProbabilities?: number[];
@@ -54,6 +73,16 @@ export interface HairHealthReport {
     disease: string;
     probability: number;
   }>;
+
+  // Fusion result from /get-diagnosis
+  fusion_result?: FusionResult;
+
+  // User info for chat bubble personalisation
+  user?: {
+    name: string;
+    age: string;
+    gender: string;
+  };
 }
 
 export interface AssessmentData {

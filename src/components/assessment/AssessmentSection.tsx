@@ -24,7 +24,12 @@ const steps = [
 
 const API_BASE_URL = "http://localhost:8000";
 
-export function AssessmentSection() {
+// ── NEW: accept onReportReady so App.tsx can pass report to chat bubble
+interface AssessmentSectionProps {
+  onReportReady?: (report: HairHealthReport) => void;
+}
+
+export function AssessmentSection({ onReportReady }: AssessmentSectionProps) {
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,19 +42,31 @@ export function AssessmentSection() {
   });
 
   /* -------------------- API CALLS -------------------- */
+const sendUserDetailsToBackend = async () => {
+  const age = parseInt(data.userDetails.age);
 
-  const sendUserDetailsToBackend = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/user-details`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: data.userDetails.name,
-          email: data.userDetails.email,
-          age: parseInt(data.userDetails.age),
-          gender: data.userDetails.gender,
-        }),
-      });
+  // Validate before sending
+  if (!data.userDetails.name || !data.userDetails.email || isNaN(age) || !data.userDetails.gender) {
+    toast({
+      title: "Missing fields",
+      description: "Please fill in all fields before continuing.",
+      variant: "destructive",
+    });
+    return false;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/user-details`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: data.userDetails.name,
+        email: data.userDetails.email,
+        age: age,
+        gender: data.userDetails.gender,
+      }),
+    });
+  
 
       if (!res.ok) throw new Error("Failed to save user details");
 
@@ -87,10 +104,6 @@ export function AssessmentSection() {
     }
   };
 
-  /**
-   * 🔥 IMPORTANT:
-   * This RETURNS ML data instead of saving it to React state
-   */
   const sendImageToBackend = async () => {
     if (data.images.length === 0) {
       toast({
@@ -139,6 +152,19 @@ export function AssessmentSection() {
     }
   };
 
+  // ── NEW: fetch full fusion report from /get-diagnosis after image upload
+  const fetchFusionReport = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/get-diagnosis`);
+      if (!res.ok) throw new Error("Failed to fetch fusion report");
+      const data = await res.json();
+      return data.fusion_result ?? null;
+    } catch (error) {
+      console.error("Fusion fetch error:", error);
+      return null;
+    }
+  };
+
   /* -------------------- STEP HANDLER -------------------- */
 
   const handleNext = async () => {
@@ -167,17 +193,31 @@ export function AssessmentSection() {
         return;
       }
 
+      // Fetch the full fusion result from backend
+      const fusionResult = await fetchFusionReport();
+
       const baseReport = generateReport(data.questionnaire);
 
       const finalReport: HairHealthReport = {
         ...baseReport,
         generatedAt: new Date(),
-        ...mlData, // ✅ ML DATA MERGED HERE (FIX)
+        ...mlData,
+        // ── NEW: attach full fusion result so chat bubble gets it
+        fusion_result: fusionResult,
+        user: {
+          name: data.userDetails.name,
+          age: data.userDetails.age,
+          gender: data.userDetails.gender,
+        },
       };
 
       console.log("FINAL REPORT:", finalReport);
 
       setReport(finalReport);
+
+      // ── NEW: notify App.tsx → passes report to DermAIChatBubble
+      onReportReady?.(finalReport);
+
       setIsSubmitting(false);
       setCurrentStep(4);
     }
@@ -208,7 +248,7 @@ export function AssessmentSection() {
                 <div key={step.id} className="flex items-center flex-1">
                   <div className="flex flex-col items-center flex-1">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                      className={`w-10 h-10 rounded-full flex items-center justify-content font-semibold ${
                         currentStep >= step.id
                           ? "bg-primary text-primary-foreground"
                           : "bg-secondary text-muted-foreground"
@@ -236,18 +276,14 @@ export function AssessmentSection() {
             {currentStep === 1 && (
               <UserDetailsForm
                 data={data.userDetails}
-                onChange={(userDetails) =>
-                  setData({ ...data, userDetails })
-                }
+                onChange={(userDetails) => setData({ ...data, userDetails })}
               />
             )}
 
             {currentStep === 2 && (
               <QuestionnaireForm
                 data={data.questionnaire}
-                onChange={(questionnaire) =>
-                  setData({ ...data, questionnaire })
-                }
+                onChange={(questionnaire) => setData({ ...data, questionnaire })}
               />
             )}
 
@@ -278,10 +314,7 @@ export function AssessmentSection() {
                 Back
               </Button>
 
-              <Button
-                onClick={handleNext}
-                disabled={isSubmitting}
-              >
+              <Button onClick={handleNext} disabled={isSubmitting}>
                 {isSubmitting
                   ? "Processing..."
                   : currentStep === 3

@@ -6,14 +6,18 @@ import { AssessmentSection } from "@/components/assessment/AssessmentSection";
 import { AboutSection } from "@/components/sections/AboutSection";
 import { ContactSection } from "@/components/sections/ContactSection";
 
-const Index = () => {
+interface IndexProps {
+  onReportReady?: (report: any) => void;
+}
+
+const Index = ({ onReportReady }: IndexProps) => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main>
         <HeroSection />
         <FeaturesSection />
-        <AssessmentSection />
+        <AssessmentSection onReportReady={onReportReady} />
         <AboutSection />
         <ContactSection />
       </main>
