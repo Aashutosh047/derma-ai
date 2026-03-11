@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 
-const GROQ_API_KEY = "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";
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+console.log("🔑 API Key loaded:", GROQ_API_KEY ? "YES" : "NO - KEY IS UNDEFINED");
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 

@@ -40,3 +40,6 @@ backend/app/ml/*.pth
 *.njsproj
 *.sln
 *.sw?
+# in .gitignore
+.env
+.env.local
