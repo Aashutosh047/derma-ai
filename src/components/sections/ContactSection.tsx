@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Mail, MessageSquare, Send } from "lucide-react";
+import { Mail, MessageSquare, Send, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export function ContactSection() {
@@ -19,15 +19,14 @@ export function ContactSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission (replace with actual API call when backend is ready)
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    
+
     toast({
       title: "Message sent!",
       description: "Thank you for reaching out. We'll get back to you soon.",
     });
-    
+
     setFormData({ name: "", email: "", message: "" });
     setIsSubmitting(false);
   };
@@ -47,10 +46,10 @@ export function ContactSection() {
             Get in Touch
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Have questions or feedback? We'd love to hear from you.
+            Have questions about your results or feedback about DermAI? We'd love to hear from you.
           </p>
         </motion.div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -65,30 +64,41 @@ export function ContactSection() {
               </div>
               <div>
                 <h3 className="font-semibold text-foreground mb-1">Email Us</h3>
-                <p className="text-muted-foreground">support@hairhealth.app</p>
+                <p className="text-muted-foreground">support@dermai.com.np</p>
               </div>
             </div>
-            
+
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <MapPin className="w-6 h-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-foreground mb-1">Based In</h3>
+                <p className="text-muted-foreground">Kathmandu, Nepal 🇳🇵</p>
+              </div>
+            </div>
+
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <MessageSquare className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground mb-1">Support</h3>
-                <p className="text-muted-foreground">We typically respond within 24 hours</p>
+                <h3 className="font-semibold text-foreground mb-1">Response Time</h3>
+                <p className="text-muted-foreground">We typically respond within 24 hours (NPT)</p>
               </div>
             </div>
-            
+
             <div className="bg-secondary/50 rounded-2xl p-6 border border-border/50">
               <h4 className="font-semibold text-foreground mb-2">Before You Reach Out</h4>
               <p className="text-muted-foreground text-sm">
-                Please note that our assessment provides general guidance and is not a 
-                substitute for professional medical advice. For specific medical concerns, 
-                please consult a dermatologist or healthcare provider.
+                DermAI provides AI-assisted screening and general guidance — it is not a
+                substitute for professional medical advice. For specific medical concerns,
+                please consult a qualified dermatologist at a recognized hospital or clinic
+                in Nepal such as TUTH, B&B Hospital, or Nepal Cancer Hospital.
               </p>
             </div>
           </motion.div>
-          
+
           <motion.form
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -107,7 +117,7 @@ export function ContactSection() {
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -119,7 +129,16 @@ export function ContactSection() {
                 required
               />
             </div>
-            
+
+            <div className="space-y-2">
+              <Label htmlFor="subject">Subject</Label>
+              <Input
+                id="subject"
+                placeholder="Hair test, Skin test, General inquiry..."
+                required
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="message">Message</Label>
               <Textarea
@@ -131,7 +150,7 @@ export function ContactSection() {
                 required
               />
             </div>
-            
+
             <Button type="submit" variant="hero" size="lg" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? (
                 "Sending..."

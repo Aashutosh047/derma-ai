@@ -13,11 +13,20 @@ sys.path.append(str(Path(__file__).parent.parent))
 from app.ml.model import run_ml_pipeline
 from app.ml.imagemodel import predict_from_image
 from app.ml.fusionmodel import run_fusion
+def predict_skin_from_image(image_bytes):
+    from app.ml.skinmodel import predict_skin_from_image as _predict
+    return _predict(image_bytes)
+
+
 
 # ------------------------------------------------------------------
 # FastAPI app
 # ------------------------------------------------------------------
-app = FastAPI()
+app = FastAPI(
+    title="DermAI API",
+    description="AI-powered skin and hair health assessment API",
+    version="3.0",
+)
 
 # ------------------------------------------------------------------
 # CORS
@@ -37,6 +46,7 @@ user_data_store = []
 questionnaire_store = []
 image_predictions_store = []
 fusion_results_store = []
+skin_predictions_store = []
 
 # ------------------------------------------------------------------
 # Pydantic models
@@ -110,18 +120,36 @@ def print_fusion_report(fusion_result: dict):
     print("\n" + "=" * 72 + "\n")
 
 
+def print_skin_report(result: dict):
+    print("\n" + "=" * 72)
+    print(" " * 22 + "SKIN DIAGNOSTIC REPORT")
+    print("=" * 72)
+    print(f"\nPredicted Condition : {result['predicted_class']}")
+    print(f"Severity            : {result['severity'].upper()}")
+    print(f"Confidence          : {result['confidence'] * 100:.2f}%")
+    print("\nTOP PREDICTIONS")
+    print("-" * 18)
+    for i, pred in enumerate(result["all_predictions"][:5], start=1):
+        print(f"{i}. {pred['disease']:<35} : {pred['probability'] * 100:.2f}%  [{pred['severity']}]")
+    print("\n" + "=" * 72 + "\n")
+
+
 # ------------------------------------------------------------------
-# Routes
+# Routes — Root
 # ------------------------------------------------------------------
 @app.get("/")
 def root():
     return {
-        "message": "Hair Health Assessment API running",
-        "fusion_model": "Active (70% Image + 30% Questionnaire)",
-        "version": "2.0",
+        "message": "DermAI API running",
+        "hair_model": "Active (70% Image + 30% Questionnaire Fusion)",
+        "skin_model": "Active (HAM10000 CNN — 8 classes)",
+        "version": "3.0",
     }
 
 
+# ------------------------------------------------------------------
+# Routes — Hair Assessment
+# ------------------------------------------------------------------
 @app.post("/user-details")
 def receive_user_details(user: UserDetails):
     user_data_store.append(user.dict())
@@ -153,7 +181,7 @@ def receive_questionnaire(q: Questionnaire):
 
 @app.post("/upload-image")
 async def upload_image(image: UploadFile = File(...)):
-    print(f"\n[/upload-image] Received image: {image.filename}")
+    print(f"\n[/upload-image] Received hair image: {image.filename}")
 
     try:
         image_bytes = await image.read()
@@ -161,12 +189,11 @@ async def upload_image(image: UploadFile = File(...)):
 
         image_predictions_store.append(prediction_result)
 
-        print("\n========== IMAGE CNN RESULT ==========")
+        print("\n========== HAIR IMAGE CNN RESULT ==========")
         print(f"Predicted: {prediction_result['predicted_class']}")
         print(f"Confidence: {prediction_result['confidence']:.2%}")
         print("=" * 40)
 
-        # ✅ Return the correct format expected by frontend
         return {
             "status": "success",
             "predicted_class": prediction_result["predicted_class"],
@@ -175,11 +202,11 @@ async def upload_image(image: UploadFile = File(...)):
                 pred["probability"] for pred in prediction_result["all_predictions"]
             ],
             "all_predictions": prediction_result["all_predictions"],
-            "prediction": prediction_result,  # Keep for backward compatibility
+            "prediction": prediction_result,
         }
 
     except Exception as e:
-        print("Image processing error:", str(e))
+        print("Hair image processing error:", str(e))
         import traceback
         traceback.print_exc()
         return {"status": "error", "message": str(e)}
@@ -188,16 +215,10 @@ async def upload_image(image: UploadFile = File(...)):
 @app.get("/get-diagnosis")
 def get_final_diagnosis():
     if not questionnaire_store:
-        return {
-            "status": "error",
-            "message": "No questionnaire data available",
-        }
+        return {"status": "error", "message": "No questionnaire data available"}
 
     if not image_predictions_store:
-        return {
-            "status": "error",
-            "message": "No image data available",
-        }
+        return {"status": "error", "message": "No image data available"}
 
     try:
         latest_questionnaire = questionnaire_store[-1]
@@ -207,8 +228,6 @@ def get_final_diagnosis():
         fusion_result = run_fusion(latest_image, questionnaire_result)
 
         fusion_results_store.append(fusion_result)
-
-        # 🔥 PRINT FULL REPORT
         print_fusion_report(fusion_result)
 
         return {
@@ -232,13 +251,56 @@ def get_latest_diagnosis():
     }
 
 
+# ------------------------------------------------------------------
+# Routes — Skin Assessment
+# ------------------------------------------------------------------
+@app.post("/skin/upload-image")
+async def upload_skin_image(image: UploadFile = File(...)):
+    print(f"\n[/skin/upload-image] Received skin image: {image.filename}")
+
+    try:
+        image_bytes = await image.read()
+        prediction_result = predict_skin_from_image(image_bytes)
+
+        skin_predictions_store.append(prediction_result)
+        print_skin_report(prediction_result)
+
+        return {
+            "status": "success",
+            "predicted_class": prediction_result["predicted_class"],
+            "confidence": prediction_result["confidence"],
+            "severity": prediction_result["severity"],
+            "all_predictions": prediction_result["all_predictions"],
+        }
+
+    except Exception as e:
+        print("Skin image processing error:", str(e))
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "message": str(e)}
+
+
+@app.get("/skin/latest")
+def get_latest_skin_diagnosis():
+    if not skin_predictions_store:
+        return {"status": "error", "message": "No skin diagnosis available"}
+    return {
+        "status": "success",
+        "diagnosis": skin_predictions_store[-1],
+    }
+
+
+# ------------------------------------------------------------------
+# Routes — Utility
+# ------------------------------------------------------------------
 @app.get("/all-data")
 def get_all_data():
     return {
         "users": user_data_store,
         "questionnaires": questionnaire_store,
-        "images": image_predictions_store,
+        "hair_images": image_predictions_store,
         "fusions": fusion_results_store,
+        "skin_images": skin_predictions_store,
     }
 
 
@@ -248,6 +310,7 @@ def clear_all_data():
     questionnaire_store.clear()
     image_predictions_store.clear()
     fusion_results_store.clear()
+    skin_predictions_store.clear()
 
     print("\n[CLEARED] All stored data removed")
 

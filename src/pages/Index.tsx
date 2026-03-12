@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { FeaturesSection } from "@/components/sections/FeaturesSection";
 import { AssessmentSection } from "@/components/assessment/AssessmentSection";
+import { SkinAssessmentSection } from "@/components/assessment/SkinAssessmentSection";
 import { AboutSection } from "@/components/sections/AboutSection";
 import { ContactSection } from "@/components/sections/ContactSection";
 
@@ -18,6 +19,7 @@ const Index = ({ onReportReady }: IndexProps) => {
         <HeroSection />
         <FeaturesSection />
         <AssessmentSection onReportReady={onReportReady} />
+        <SkinAssessmentSection onReportReady={onReportReady} />
         <AboutSection />
         <ContactSection />
       </main>

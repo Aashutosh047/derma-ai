@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
   { href: "#features", label: "Features" },
-  { href: "#assessment", label: "Take Test" },
+  { href: "#hair-assessment", label: "Hair Test" },
+  { href: "#skin-assessment", label: "Skin Test" },
   { href: "#about", label: "About" },
   { href: "#contact", label: "Contact" },
 ];
@@ -32,9 +33,9 @@ export function Header() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <a href="#" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">H</span>
+              <span className="text-primary-foreground font-bold text-lg">D</span>
             </div>
-            <span className="font-bold text-xl text-foreground">HairHealth</span>
+            <span className="font-bold text-xl text-foreground">DermAI</span>
           </a>
 
           {/* Desktop Navigation */}
@@ -49,7 +50,7 @@ export function Header() {
               </a>
             ))}
             <Button variant="hero" size="default" asChild>
-              <a href="#assessment">Get Started</a>
+              <a href="#hair-assessment">Get Started</a>
             </Button>
           </nav>
 
@@ -84,7 +85,7 @@ export function Header() {
                 </a>
               ))}
               <Button variant="hero" size="lg" asChild>
-                <a href="#assessment" onClick={() => setIsMobileMenuOpen(false)}>
+                <a href="#hair-assessment" onClick={() => setIsMobileMenuOpen(false)}>
                   Get Started
                 </a>
               </Button>

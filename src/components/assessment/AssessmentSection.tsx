@@ -238,10 +238,16 @@ const sendUserDetailsToBackend = async () => {
   /* -------------------- UI -------------------- */
 
   return (
-    <section id="assessment" className="py-20 md:py-32 bg-secondary/30">
+    <section id="hair-assessment" className="py-20 md:py-32 bg-secondary/30">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto bg-card rounded-2xl p-6 md:p-10 shadow-card border">
           {/* Step Indicators */}
+          {/* Section Header */}
+<div className="text-center mb-8">
+  <span className="text-primary font-semibold text-sm uppercase tracking-wider">Step-by-Step</span>
+  <h2 className="text-2xl md:text-3xl font-bold text-foreground mt-2">🧴 Hair Health Assessment</h2>
+  <p className="text-muted-foreground mt-2 text-sm">Upload a scalp photo and answer a few questions for your personalized report.</p>
+</div>
           <div className="mb-8">
             <div className="flex justify-between items-center">
               {steps.map((step, index) => (
