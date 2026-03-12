@@ -317,7 +317,7 @@ export function SkinAssessmentSection({ onReportReady }: SkinAssessmentSectionPr
                 Back
               </Button>
 
-              <Button onClick={handleNext} disabled={isSubmitting}>
+              <Button type="button" onClick={handleNext} disabled={isSubmitting}>
                 {isSubmitting
                   ? "Analyzing..."
                   : currentStep === 2
