@@ -4,11 +4,12 @@ import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
-  { href: "#features", label: "Features" },
-  { href: "#hair-assessment", label: "Hair Test" },
-  { href: "#skin-assessment", label: "Skin Test" },
-  { href: "#about", label: "About" },
-  { href: "#contact", label: "Contact" },
+  { href: "#features",        label: "Features",  external: false },
+  { href: "#hair-assessment", label: "Hair Test",  external: false },
+  { href: "#skin-assessment", label: "Skin Test",  external: false },
+  { href: "/consult",         label: "Consult",    external: true  },
+  { href: "#about",           label: "About",      external: false },
+  { href: "#contact",         label: "Contact",    external: false },
 ];
 
 export function Header() {
@@ -16,9 +17,7 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -31,7 +30,7 @@ export function Header() {
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
-          <a href="#" className="flex items-center gap-2">
+          <a href="/" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-lg">D</span>
             </div>
@@ -40,15 +39,25 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-muted-foreground hover:text-foreground transition-colors font-medium"
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) =>
+              link.external ? (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="flex items-center gap-1.5 text-primary font-semibold hover:text-primary/80 transition-colors bg-primary/10 px-3 py-1.5 rounded-full text-sm"
+                >
+                  💬 {link.label}
+                </a>
+              ) : (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="text-muted-foreground hover:text-foreground transition-colors font-medium"
+                >
+                  {link.label}
+                </a>
+              )
+            )}
             <Button variant="hero" size="default" asChild>
               <a href="#hair-assessment">Get Started</a>
             </Button>
@@ -74,16 +83,27 @@ export function Header() {
             className="md:hidden bg-background border-t border-border"
           >
             <nav className="container mx-auto px-4 py-4 flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="text-muted-foreground hover:text-foreground transition-colors font-medium py-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.label}
-                </a>
-              ))}
+              {navLinks.map((link) =>
+                link.external ? (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="flex items-center gap-2 text-primary font-semibold py-2 bg-primary/10 px-4 rounded-xl"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    💬 {link.label}
+                  </a>
+                ) : (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="text-muted-foreground hover:text-foreground transition-colors font-medium py-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.label}
+                  </a>
+                )
+              )}
               <Button variant="hero" size="lg" asChild>
                 <a href="#hair-assessment" onClick={() => setIsMobileMenuOpen(false)}>
                   Get Started
