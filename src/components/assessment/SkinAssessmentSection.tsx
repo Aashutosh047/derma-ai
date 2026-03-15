@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Download } from "lucide-react";
 import { UserDetailsForm } from "./UserDetailsForm";
+import { downloadSkinReportPDF } from "@/lib/pdfGenerator";
 import { ImageUploadForm } from "./ImageUploadForm";
 import { useToast } from "@/hooks/use-toast";
 import { UploadedImage } from "@/types/assessment";
@@ -234,9 +235,15 @@ export function SkinAssessmentSection({ onReportReady }: SkinAssessmentSectionPr
           </p>
         </div>
 
-        <Button onClick={handleReset} variant="outline" className="w-full">
-          Start New Skin Assessment
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button className="flex-1 gap-2" onClick={() => downloadSkinReportPDF(report)}>
+            <Download className="w-4 h-4" />
+            Download PDF Report
+          </Button>
+          <Button onClick={handleReset} variant="outline" className="flex-1">
+            Start New Skin Assessment
+          </Button>
+        </div>
       </div>
     );
   };
