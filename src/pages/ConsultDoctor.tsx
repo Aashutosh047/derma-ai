@@ -28,7 +28,7 @@ const DOCTORS = [
   {
     id: "AM02",
     token: "DERM-AM02",
-    name: "Dr. Ayush Malla",
+    name: "Dr. Milan Karki",
     specialty: "Skin Cancer Specialist",
     experience: "11 years",
     rating: 4.8,
